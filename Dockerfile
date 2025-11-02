@@ -2,12 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore
-COPY ["CreatingTestProj.csproj", "./"]
-RUN dotnet restore "CreatingTestProj.csproj"
+# Copy the csproj file from the correct subfolder
+COPY ["CreatingTestProj/CreatingTestProj.csproj", "CreatingTestProj/"]
+RUN dotnet restore "CreatingTestProj/CreatingTestProj.csproj"
 
-# Copy the rest of the source and build
+# Copy everything and build
 COPY . .
+WORKDIR /src/CreatingTestProj
 RUN dotnet publish "CreatingTestProj.csproj" -c Release -o /app/publish
 
 # Runtime stage
