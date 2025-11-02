@@ -2,16 +2,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy and restore
-COPY CreatingTestProj/*.csproj ./CreatingTestProj/
-RUN dotnet restore "CreatingTestProj/CreatingTestProj.csproj"
+# Copy csproj and restore
+COPY ./*.csproj ./
+RUN dotnet restore
 
-# Copy everything and build
+# Copy everything and publish
 COPY . .
-WORKDIR /src/CreatingTestProj
 RUN dotnet publish -c Release -o /app
 
-# Runtime image
+# Use the ASP.NET runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app ./
