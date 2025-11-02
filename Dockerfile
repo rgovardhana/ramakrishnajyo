@@ -1,25 +1,20 @@
-# 1️⃣ Build stage - use SDK image
+# Use the .NET 8 SDK image to build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy the csproj and restore dependencies first (for better caching)
-COPY *.csproj ./
-RUN dotnet restore
+# Copy and restore
+COPY CreatingTestProj/*.csproj ./CreatingTestProj/
+RUN dotnet restore "CreatingTestProj/CreatingTestProj.csproj"
 
-# Copy everything else and publish
+# Copy everything and build
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
+WORKDIR /src/CreatingTestProj
+RUN dotnet publish -c Release -o /app
 
-# 2️⃣ Runtime stage - smaller image
+# Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-
-# Copy the published output from build stage
-COPY --from=build /app/publish .
-
-# Expose port Railway expects
+COPY --from=build /app ./
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
-
-# Start the app
 ENTRYPOINT ["dotnet", "CreatingTestProj.dll"]
